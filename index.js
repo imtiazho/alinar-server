@@ -73,6 +73,16 @@ async function run() {
       res.send(specificSharee);
     });
 
+    // Get Orders for targetd user
+    app.get("/orders", async (req, res) => {
+      const userEmail = req.query.clientEmail;
+      const query = { clientEmail: userEmail };
+      const cursor = ordersCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    // Here start paricular data fetching
     // Get One Three Pis
     app.get("/threePis/:id", async (req, res) => {
       const id = req.params.id;
@@ -105,12 +115,20 @@ async function run() {
       res.send(specificBestSellingProduct);
     });
 
+    // Post order to Order Collection
     app.post("/order", async (req, res) => {
       const newProductInCart = req.body;
-      console.log(newProductInCart);
       const result = await ordersCollection.insertOne(newProductInCart);
       res.send(result);
     });
+
+    // Delete order data by one and one
+    app.delete('/order/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await ordersCollection.deleteOne(query);
+      res.send(result);
+    })
   } finally {
     // await client.close()
   }
