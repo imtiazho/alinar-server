@@ -38,6 +38,14 @@ async function run() {
       res.send(cursor);
     });
 
+    // Get All Orders
+    app.get("/allOrders", async (req, res) => {
+      const query = {};
+      const orders = ordersCollection.find(query);
+      const cursor = await orders.toArray();
+      res.send(cursor);
+    });
+
     // Get Only Sharee
     app.get("/sharees/:handCodedId", async (req, res) => {
       const productId = req.params.handCodedId;
@@ -75,7 +83,8 @@ async function run() {
 
     // Get Orders for targetd user
     app.get("/orders", async (req, res) => {
-      const userEmail = req.query.clientEmail;
+      const userEmail = req.query.email;
+      console.log(userEmail)
       const query = { clientEmail: userEmail };
       const cursor = ordersCollection.find(query);
       const result = await cursor.toArray();
