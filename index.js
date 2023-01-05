@@ -169,6 +169,24 @@ async function run() {
       );
       res.send(result);
     });
+
+    // handle moderator
+    // app.put('/user/admin/:email', async (req, res) => {
+    //   const email = req.params.email;
+    //   const requester = await usersCollection.findOne({ userEmail: email });
+    //   if(requester?.role === 'admin'){
+
+    //   }
+    // })
+
+    // Check Admin
+    app.get('/admin/:email', async (req, res) => {
+      const email = req.params.email;
+      const user = await usersCollection.findOne({ userEmail: email });
+      const isAdmin = user?.role === "admin";
+      res.send({ admin: isAdmin });
+    })
+
   } finally {
     // await client.close()
   }
