@@ -29,6 +29,7 @@ async function run() {
       .collection("bestSellingProductCollection");
 
     const ordersCollection = client.db("alinar_fashion").collection("orders");
+    const usersCollection = client.db("alinar_fashion").collection("users");
 
     // Get All Products
     app.get("/allProducts", async (req, res) => {
@@ -45,6 +46,14 @@ async function run() {
       const cursor = await orders.toArray();
       res.send(cursor);
     });
+
+    // Get specific user info(Testing)
+    app.get('/user', async (req, res) => {
+      const userMail = req.query.userEmail;
+      const query = { userEmail: userMail };
+      const users = await usersCollection.findOne(query);
+      res.send(users);
+    })
 
     // Get Only Sharee
     app.get("/sharees/:handCodedId", async (req, res) => {
@@ -84,7 +93,6 @@ async function run() {
     // Get Orders for targetd user
     app.get("/orders", async (req, res) => {
       const userEmail = req.query.email;
-      console.log(userEmail)
       const query = { clientEmail: userEmail };
       const cursor = ordersCollection.find(query);
       const result = await cursor.toArray();
@@ -138,6 +146,29 @@ async function run() {
       const result = await ordersCollection.deleteOne(query);
       res.send(result);
     })
+
+    // Get all user to admin panel
+    app.get('/users', async (req, res) => {
+      const result = await usersCollection.find({}).toArray();
+      res.send(result)
+    })
+
+    // Store user
+    app.put("/user/:email", async (req, res) => {
+      const email = req.params.email;
+      const user = req.body;
+      const filter = { email: email };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: user,
+      };
+      const result = await usersCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
+      res.send(result);
+    });
   } finally {
     // await client.close()
   }
