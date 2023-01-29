@@ -16,7 +16,6 @@ const client = new MongoClient(uri, {
   useUnifiedTopology: true,
   serverApi: ServerApiVersion.v1,
 });
-
 async function run() {
   try {
     await client.connect();
@@ -38,6 +37,13 @@ async function run() {
       const cursor = await allProduct.toArray();
       res.send(cursor);
     });
+
+    // Upload Product
+    app.post("/allProducts", async (req, res) => {
+      const requestedProduct = req.body;
+      const result = await ProductsCollection.insertOne(requestedProduct);
+      res.send(result);
+    })
 
     // Get All Orders
     app.get("/allOrders", async (req, res) => {
