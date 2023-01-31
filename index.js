@@ -153,6 +153,22 @@ async function run() {
       res.send(result);
     })
 
+    // Accept Order Method
+    app.put("/order/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: { orderStatus: true },
+      };
+      const result = await ordersCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
+      res.send(result);
+    })
+
     // Get all user to admin panel
     app.get('/users', async (req, res) => {
       const result = await usersCollection.find({}).toArray();
@@ -175,6 +191,8 @@ async function run() {
       );
       res.send(result);
     });
+
+
 
     // handle moderator
     // app.put('/user/admin/:email', async (req, res) => {
