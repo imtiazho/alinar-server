@@ -33,7 +33,7 @@ async function run() {
     // Get All Products
     app.get("/allProducts", async (req, res) => {
       const query = {};
-      const allProduct = ProductsCollection.find(query);
+      const allProduct = ProductsCollection.find(query).sort({ $natural: -1 });
       const cursor = await allProduct.toArray();
       res.send(cursor);
     });
@@ -65,7 +65,7 @@ async function run() {
     app.get("/sharees/:handCodedId", async (req, res) => {
       const productId = req.params.handCodedId;
       const query = { handCodedId: productId };
-      const allProduct = ProductsCollection.find(query);
+      const allProduct = ProductsCollection.find(query).sort({ $natural: -1 });
       const cursor = await allProduct.toArray();
       res.send(cursor);
     });
@@ -74,7 +74,7 @@ async function run() {
     app.get("/abayas/:handCodedId", async (req, res) => {
       const productId = req.params.handCodedId;
       const query = { handCodedId: productId };
-      const allProduct = ProductsCollection.find(query);
+      const allProduct = ProductsCollection.find(query).sort({ $natural: -1 });
       const cursor = await allProduct.toArray();
       res.send(cursor);
     });
@@ -83,7 +83,7 @@ async function run() {
     app.get("/threePises/:handCodedId", async (req, res) => {
       const productId = req.params.handCodedId;
       const query = { handCodedId: productId };
-      const allProduct = ProductsCollection.find(query);
+      const allProduct = ProductsCollection.find(query).sort({ $natural: -1 });
       const cursor = await allProduct.toArray();
       res.send(cursor);
     });
