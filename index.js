@@ -192,7 +192,21 @@ async function run() {
       res.send(result);
     });
 
+    // Delete exist product
+    app.delete('/allproduct/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await ProductsCollection.deleteOne(query);
+      res.send(result);
+    })
 
+    // Delete user
+    app.delete('/user/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await usersCollection.deleteOne(query);
+      res.send(result);
+    })
 
     // handle moderator
     // app.put('/user/admin/:email', async (req, res) => {
@@ -202,6 +216,21 @@ async function run() {
 
     //   }
     // })
+
+    app.put('/userTomoderator/:email', async (req, res) => {
+      const email = req.params.email;
+      const filter = { email: email };
+      const options = { upsert: true }
+      const updateDoc = {
+        $set: { role: "moderator" },
+      };
+      const result = await usersCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
+      res.send(result);
+    })
 
     // Check Admin
     app.get('/admin/:email', async (req, res) => {
