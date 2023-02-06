@@ -56,7 +56,7 @@ async function run() {
     // Get specific user info(Testing)
     app.get('/user', async (req, res) => {
       const userMail = req.query.userEmail;
-      const query = { userEmail: userMail };
+      const query = { email: userMail };
       const users = await usersCollection.findOne(query);
       res.send(users);
     })
@@ -209,14 +209,6 @@ async function run() {
     })
 
     // handle moderator
-    // app.put('/user/admin/:email', async (req, res) => {
-    //   const email = req.params.email;
-    //   const requester = await usersCollection.findOne({ userEmail: email });
-    //   if(requester?.role === 'admin'){
-
-    //   }
-    // })
-
     app.put('/userTomoderator/:email', async (req, res) => {
       const email = req.params.email;
       const filter = { email: email };
