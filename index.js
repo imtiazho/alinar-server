@@ -23,9 +23,9 @@ async function run() {
       .db("alinar_fashion")
       .collection("products");
 
-    const bestSellingProductsCollection = client
-      .db("alinar_fashion")
-      .collection("bestSellingProductCollection");
+    // const bestSellingProductsCollection = client
+    //   .db("alinar_fashion")
+    //   .collection("bestSellingProductCollection");
 
     const ordersCollection = client.db("alinar_fashion").collection("orders");
     const usersCollection = client.db("alinar_fashion").collection("users");
@@ -121,22 +121,22 @@ async function run() {
       res.send(specificAbaya);
     });
 
-    // Get Best selling all product
-    app.get("/bestSellingProducts", async (req, res) => {
-      const query = {};
-      const allProduct = bestSellingProductsCollection.find(query);
-      const cursor = await allProduct.toArray();
-      res.send(cursor);
-    });
+    // // Get Best selling all product
+    // app.get("/bestSellingProducts", async (req, res) => {
+    //   const query = {};
+    //   const allProduct = bestSellingProductsCollection.find(query);
+    //   const cursor = await allProduct.toArray();
+    //   res.send(cursor);
+    // });
 
-    // Get One Product of Shop
-    app.get("/bestSellingProduct/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: ObjectId(id) };
-      const specificBestSellingProduct =
-        await bestSellingProductsCollection.findOne(query);
-      res.send(specificBestSellingProduct);
-    });
+    // // Get One Product of Shop
+    // app.get("/bestSellingProduct/:id", async (req, res) => {
+    //   const id = req.params.id;
+    //   const query = { _id: ObjectId(id) };
+    //   const specificBestSellingProduct =
+    //     await bestSellingProductsCollection.findOne(query);
+    //   res.send(specificBestSellingProduct);
+    // });
 
     // Post order to Order Collection
     app.post("/order", async (req, res) => {
@@ -162,6 +162,23 @@ async function run() {
         $set: { orderStatus: true },
       };
       const result = await ordersCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
+      res.send(result);
+    })
+
+    // Deliver Counter
+    app.put('/productDeliverCounter/:productName', async (req, res) => {
+      const productName = req.params.productName;
+      const delivered = req.body;
+      const filter = { name: productName };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: delivered,
+      };
+      const result = await ProductsCollection.updateOne(
         filter,
         updateDoc,
         options
