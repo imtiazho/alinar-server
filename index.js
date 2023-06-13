@@ -4,10 +4,43 @@ const cors = require("cors");
 require("dotenv").config();
 const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const jwt = require('jsonwebtoken');
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Custom function to verify jwt token
+// const verifyJwt = (token) => {
+//   let email;
+//   jwt.verify(token, process.env.ACCESS_TOKEN, function (err, decoded) {
+//     if (err) {
+//       res.status(401).send({ message: "Invalid Token" });
+//     }
+//     else if (decoded) {
+//       email = decoded;
+//     }
+//   });
+
+//   return email;
+// }
+
+const verifyJwt = (req, res, next) => {
+  const authHeaders = req.headers.authorization;
+  if (!authHeaders) {
+    res.status(401).send({ message: "Unauthorize Access" });
+  }
+  const [email, token] = authHeaders?.split(" ");
+  jwt.verify(token, process.env.ACCESS_TOKEN, function (err, decoded) {
+    if (err) {
+      res.status(403).send({ message: "Forbidden" });
+    }
+    if (decoded) {
+      req.decoded = decoded;
+      next();
+    }
+  });
+}
 
 // Mongo Db Important Links
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@alinar.azrvfe1.mongodb.net/?retryWrites=true&w=majority`;
@@ -23,12 +56,25 @@ async function run() {
       .db("alinar_fashion")
       .collection("products");
 
-    // const bestSellingProductsCollection = client
-    //   .db("alinar_fashion")
-    //   .collection("bestSellingProductCollection");
-
     const ordersCollection = client.db("alinar_fashion").collection("orders");
     const usersCollection = client.db("alinar_fashion").collection("users");
+
+    // Access Token Generator
+    app.post('/jwtTokenGenerator', (req, res) => {
+      const user = req.body;
+      if (user) {
+        var token = jwt.sign({ email: user.emailToToken }, process.env.ACCESS_TOKEN, { expiresIn: '5h' });
+        res.send({
+          success: true,
+          token
+        });
+      }
+      else {
+        res.send({
+          success: false
+        });
+      }
+    })
 
     // Get All Products
     app.get("/allProducts", async (req, res) => {
@@ -39,14 +85,14 @@ async function run() {
     });
 
     // Upload Product
-    app.post("/allProducts", async (req, res) => {
+    app.post("/allProducts", verifyJwt, async (req, res) => {
       const requestedProduct = req.body;
       const result = await ProductsCollection.insertOne(requestedProduct);
       res.send(result);
     })
 
     // Get All Orders
-    app.get("/allOrders", async (req, res) => {
+    app.get("/allOrders", verifyJwt, async (req, res) => {
       const query = {};
       const orders = ordersCollection.find(query);
       const cursor = await orders.toArray();
@@ -97,7 +143,7 @@ async function run() {
     });
 
     // Get Orders for targetd user
-    app.get("/orders", async (req, res) => {
+    app.get("/orders", verifyJwt, async (req, res) => {
       const userEmail = req.query.email;
       const query = { clientEmail: userEmail };
       const cursor = ordersCollection.find(query);
@@ -121,23 +167,6 @@ async function run() {
       res.send(specificAbaya);
     });
 
-    // // Get Best selling all product
-    // app.get("/bestSellingProducts", async (req, res) => {
-    //   const query = {};
-    //   const allProduct = bestSellingProductsCollection.find(query);
-    //   const cursor = await allProduct.toArray();
-    //   res.send(cursor);
-    // });
-
-    // // Get One Product of Shop
-    // app.get("/bestSellingProduct/:id", async (req, res) => {
-    //   const id = req.params.id;
-    //   const query = { _id: ObjectId(id) };
-    //   const specificBestSellingProduct =
-    //     await bestSellingProductsCollection.findOne(query);
-    //   res.send(specificBestSellingProduct);
-    // });
-
     // Post order to Order Collection
     app.post("/order", async (req, res) => {
       const newProductInCart = req.body;
@@ -146,7 +175,7 @@ async function run() {
     });
 
     // Delete order data by one and one
-    app.delete('/order/:id', async (req, res) => {
+    app.delete('/order/:id', verifyJwt, async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await ordersCollection.deleteOne(query);
@@ -154,7 +183,7 @@ async function run() {
     })
 
     // Accept Order Method
-    app.put("/order/:id", async (req, res) => {
+    app.put("/order/:id", verifyJwt, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: ObjectId(id) };
       const options = { upsert: true };
@@ -187,7 +216,7 @@ async function run() {
     })
 
     // Get all user to admin panel
-    app.get('/users', async (req, res) => {
+    app.get('/users', verifyJwt, async (req, res) => {
       const result = await usersCollection.find({}).toArray();
       res.send(result)
     })
@@ -210,7 +239,7 @@ async function run() {
     });
 
     // Delete exist product
-    app.delete('/allproduct/:id', async (req, res) => {
+    app.delete('/allproduct/:id', verifyJwt, async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await ProductsCollection.deleteOne(query);
